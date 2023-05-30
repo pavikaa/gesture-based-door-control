@@ -20,7 +20,7 @@
 
   Library: ArduinoBLE
   Author: Arduino
-  Version: 1.3.2
+  Version: 1.3.4
   More information: https://github.com/arduino-libraries/ArduinoBLE
 
   Library: TensorFlowLite Micro
