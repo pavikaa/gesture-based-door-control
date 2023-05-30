@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Door Control</title>
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #door-container {
+        width: 400px;
+        height: 400px;
+      }
+
+      #door {
+        width: 100%;
+        height: 100%;
+        background-image: url('images/closed_door.png');
+        background-repeat: no-repeat;
+        background-size: contain;
+      }
+
+      #door-container.disconnected #door {
+        opacity: 0.2;
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: rotateY(0deg);
+          transform-origin: left bottom;
+        }
+
+        100% {
+          transform: rotateY(-90deg);
+          transform-origin: left bottom;
+        }
+      }
+
+      .rotate-animation {
+        animation: rotate 0.5s linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="door-container" class="disconnected">
+      <div id="door"></div>
+    </div>
+    <button id="connect-button">Connect to Arduino</button>
+    <script>
+      document.addEventListener('DOMContentLoaded', event => {
+        const doorContainer = document.getElementById('door-container');
+        const door = document.getElementById('door');
+        let isOpen = false;
+        let isAnimating = false;
+        let arduinoDevice;
+
+        function setDoorState(open) {
+          if (isOpen !== open && !isAnimating) {
+            isOpen = open;
+            isAnimating = true;
+            if (open) {
+              door.classList.add('rotate-animation');
+            }
+            setTimeout(() => {
+              door.classList.remove('rotate-animation');
+              isAnimating = false;
+              door.style.backgroundImage = `url('images/${open ? 'open' : 'closed'}_door.png')`;
+            }, 350);
+          }
+        }
+
+        function receiveDoorStateFromArduino(open) {
+          setDoorState(open);
+          if (open) {
+            setTimeout(() => {
+              receiveDoorStateFromArduino(false);
+            }, 10000);
+          }
+        }
+
+        const connectButton = document.getElementById('connect-button');
+        let isConnected = false;
+
+        async function connectToArduino() {
+          try {
+            arduinoDevice = await navigator.bluetooth.requestDevice({
+              filters: [
+                { services: ['be28eab6-8cc7-4d63-a396-134e1e26fb1d'] } // SERVICE_UUID
+              ]
+            });
+            const server = await arduinoDevice.gatt.connect();
+            console.log('arduinoDevice:', arduinoDevice);
+            console.log('Connected to Arduino:', arduinoDevice.name);
+            console.log('server:', server);
+            // Subscribe to the door state characteristic for receiving updates from Arduino
+            const service = await server.getPrimaryService('be28eab6-8cc7-4d63-a396-134e1e26fb1d');
+            console.log('service:', service);
+            const doorStateCharacteristic = await service.getCharacteristic('e04ff209-6ae4-45e3-8a38-0baefdba9b53');
+            console.log('doorStateCharacteristic:', doorStateCharacteristic);
+            doorStateCharacteristic.addEventListener('characteristicvaluechanged', event => {
+              const value = event.target.value;
+              const isOpen = value.getUint8(0) === 1;
+              console.log('Received door state from Arduino:', isOpen);
+              receiveDoorStateFromArduino(isOpen);
+            });
+            await doorStateCharacteristic.startNotifications();
+            // Remove the "disconnected" class from the door container
+            doorContainer.classList.remove('disconnected');
+            isConnected = true;
+            connectButton.textContent = 'Disconnect from Arduino';
+          } catch (error) {
+            console.error('Failed to connect to Arduino:', error);
+          }
+        }
+
+        async function disconnectFromArduino() {
+          try {
+            if (arduinoDevice && arduinoDevice.gatt.connected) {
+              await arduinoDevice.gatt.disconnect();
+              console.log('Disconnected from Arduino:', arduinoDevice.name);
+              doorContainer.classList.add('disconnected');
+              isConnected = false;
+              connectButton.textContent = 'Connect to Arduino';
+            }
+          } catch (error) {
+            console.error('Failed to disconnect from Arduino:', error);
+          }
+        }
+
+        connectButton.addEventListener('click', async () => {
+          if (isConnected) {
+            await disconnectFromArduino();
+          } else {
+            await connectToArduino();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
