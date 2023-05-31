@@ -1,3 +1,4 @@
+
 Gesture-based Door Control
 ==========================
 
@@ -20,6 +21,12 @@ The `imu_capture` folder contains the code for capturing data from the IMU senso
 The `imu_classifier` folder contains the code for classifying gestures using the captured IMU data. It utilizes a machine learning model to classify the performed gestures based on the sensor data. When the correct gesture is detected, a "true" message is sent via the Bluetooth connection, triggering the door opening on the web page.
 
 -   `imu_classifier.ino`: Arduino sketch that runs a machine learning model to classify gestures using the recorded IMU data and informs connected devices via Bluetooth if the correct gesture has been detected.
+
+### Model training
+The `model_training` folder contains a Jupyter notebook with a clear step-by-step process of training a model for gesture recognition. To run the notebook open it with [Google Colab](https://colab.research.google.com/). Also included are two sample .csv files used for training the `model.h` file included in the `imu_classifier` folder.
+
+ - `arduino_gesture_model_training.ipynb`: Jupyter notebook that trains a gesture model based on the recorded `.csv` files and encodes it into an Arduino header file.
+ 
 
 ### Web Page
 
