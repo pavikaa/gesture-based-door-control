@@ -46,7 +46,7 @@ Usage
 
 4.  Save the captured data for later use in training or classification (export the Serial output to a .csv file).
 
-5.  Train a machine learning model using the captured IMU data and export the model to `model.h`. Place the `model.h` file in the `imu_classification` folder.
+5.  Train a machine learning model using the captured IMU data and export the model to `model.h` by opening the `arduino_gesture_model_training.ipynb` file included in `model_training` folder with [Google Colab](https://colab.research.google.com/) and following the steps inside. Place the `model.h` file in the `imu_classification` folder.
 
 6.  Upload the `imu_classification.ino` sketch to the Arduino.
 
