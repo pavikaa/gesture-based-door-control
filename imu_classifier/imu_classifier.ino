@@ -201,7 +201,7 @@ void loop() {
               Serial.print(": ");
               Serial.println(tflOutputTensor->data.f[i], 6);
               // Check if the read gesture is the correct one
-              if (i == CORRECT_GESTURE_INDEX && tflOutputTensor->data.f[i] > 0.90) {
+              if (i == CORRECT_GESTURE_INDEX && tflOutputTensor->data.f[i] > 0.999999) {
                 Serial.println("Correct gesture detected.");
                 openDoorCharacteristic->writeValue(1);
               }
