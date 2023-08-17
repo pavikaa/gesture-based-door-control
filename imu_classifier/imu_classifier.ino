@@ -63,7 +63,10 @@ byte tensorArena[TENSOR_ARENA_SIZE] __attribute__((aligned(16)));
 // Array to map gesture index to a name
 const char* gestureNames[] = {
   "c_up_push",
-  "other"
+  "random_1",
+  "random_2",
+  "random_3",
+  "random_4"
 };
 
 // Index of the correct gesture
@@ -201,7 +204,7 @@ void loop() {
               Serial.print(": ");
               Serial.println(tflOutputTensor->data.f[i], 6);
               // Check if the read gesture is the correct one
-              if (i == CORRECT_GESTURE_INDEX && tflOutputTensor->data.f[i] > 0.999999) {
+              if (i == CORRECT_GESTURE_INDEX && tflOutputTensor->data.f[i] > 0.8) {
                 Serial.println("Correct gesture detected.");
                 openDoorCharacteristic->writeValue(1);
               }
